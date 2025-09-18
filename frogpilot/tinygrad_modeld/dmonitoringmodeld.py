@@ -1,13 +1,9 @@
 #!/usr/bin/env python3
 import os
 from openpilot.system.hardware import TICI
+os.environ['DEV'] = 'QCOM' if TICI else 'LLVM'
 from tinygrad.tensor import Tensor
 from tinygrad.dtype import dtypes
-if TICI:
-  from openpilot.frogpilot.tinygrad_modeld.runners.tinygrad_helpers import qcom_tensor_from_opencl_address
-  os.environ['QCOM'] = '1'
-else:
-  os.environ['LLVM'] = '1'
 import math
 import time
 import pickle
@@ -26,6 +22,7 @@ from openpilot.common.transformations.camera import _ar_ox_fisheye, _os_fisheye
 from openpilot.frogpilot.tinygrad_modeld.models.commonmodel_pyx import CLContext, MonitoringModelFrame
 from openpilot.frogpilot.tinygrad_modeld.parse_model_outputs import sigmoid
 from openpilot.system import sentry
+from openpilot.frogpilot.tinygrad_modeld.runners.tinygrad_helpers import qcom_tensor_from_opencl_address
 
 MODEL_WIDTH, MODEL_HEIGHT = DM_INPUT_SIZE
 CALIB_LEN = 3
@@ -35,6 +32,9 @@ OUTPUT_SIZE = 84 + FEATURE_LEN
 PROCESS_NAME = "frogpilot.tinygrad_modeld.dmonitoringmodeld"
 SEND_RAW_PRED = os.getenv('SEND_RAW_PRED')
 MODEL_PKL_PATH = Path(__file__).parent / 'models/dmonitoring_model_tinygrad.pkl'
+
+# Fixed small stagger to reduce overlap with driving model GPU work
+DM_STAGGER_SEC = 0.010
 
 
 class DriverStateResult(ctypes.Structure):
@@ -95,7 +95,7 @@ class ModelState:
       self.tensor_inputs['input_img'] = Tensor(self.frame.buffer_from_cl(input_img_cl).reshape((1, MODEL_WIDTH*MODEL_HEIGHT)), dtype=dtypes.uint8).realize()
 
 
-    output = self.model_run(**self.tensor_inputs).numpy().flatten()
+    output = self.model_run(**self.tensor_inputs).contiguous().realize().uop.base.buffer.numpy()
 
     t2 = time.perf_counter()
     return output, t2 - t1
@@ -123,7 +123,7 @@ def get_driverstate_packet(model_output: np.ndarray, frame_id: int, location_ts:
   ds = msg.driverStateV2
   ds.frameId = frame_id
   ds.modelExecutionTime = execution_time
-  ds.gpuExecutionTime = gpu_execution_time
+  ds.dspExecutionTime = gpu_execution_time
   ds.poorVisionProb = float(sigmoid(model_result.poor_vision_prob))
   ds.wheelOnRightProb = float(sigmoid(model_result.wheel_on_right_prob))
   ds.rawPredictions = model_output.tobytes() if SEND_RAW_PRED else b''
@@ -169,12 +169,12 @@ def main():
     if sm.updated["liveCalibration"]:
       calib[:] = np.array(sm["liveCalibration"].rpyCalib)
 
+    # Small fixed delay to reduce GPU overlap with driving model
+    time.sleep(DM_STAGGER_SEC)
+
     t1 = time.perf_counter()
     model_output, gpu_execution_time = model.run(buf, calib, model_transform)
     t2 = time.perf_counter()
-
-    # run one more time, just for the load
-    model.run(buf, calib, model_transform)
 
     pm.send("driverStateV2", get_driverstate_packet(model_output, vipc_client.frame_id, vipc_client.timestamp_sof, t2 - t1, gpu_execution_time))
 
