@@ -277,11 +277,11 @@ class CarInterface(CarInterfaceBase):
 
     elif candidate == CAR.CADILLAC_CT6_CC:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
-    elif candidate == CAR.CHEVROLET_MALIBU_CC:
+ 
+    elif candidate in (CAR.CHEVROLET_MALIBU_CC, CAR.CHEVROLET_MALIBU_HYBRID_CC):
       ret.steerActuatorDelay = 0.2
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
-
+ 
     elif candidate == CAR.CHEVROLET_TRAX:
       CarInterfaceBase.configure_torque_tune(candidate, ret.lateralTuning)
 
@@ -329,7 +329,7 @@ class CarInterface(CarInterfaceBase):
 
       ret.stoppingDecelRate = 11.18  # == 25 mph/s (.04 rate)
 
-      if candidate != CAR.CHEVROLET_BOLT_CC:
+      if candidate not in (CAR.CHEVROLET_BOLT_CC, CAR.CHEVROLET_MALIBU_HYBRID_CC):
         ret.longitudinalTuning.kiBP = [10.7, 10.8, 28.]
         ret.longitudinalTuning.kiV = [0., 20., 20.]  # set lower end to 0 since we can't drive below that speed
       else:
