@@ -6,7 +6,7 @@ from openpilot.selfdrive.monitoring.helpers import DriverMonitoring
 
 
 def dmonitoringd_thread():
-  config_realtime_process([0, 1, 2, 3], 5)
+  config_realtime_process([0, 1, 2, 3], 8)
 
   params = Params()
   pm = messaging.PubMaster(['driverMonitoringState'])
