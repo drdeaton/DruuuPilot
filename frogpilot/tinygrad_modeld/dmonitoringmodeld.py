@@ -33,6 +33,9 @@ PROCESS_NAME = "frogpilot.tinygrad_modeld.dmonitoringmodeld"
 SEND_RAW_PRED = os.getenv('SEND_RAW_PRED')
 MODEL_PKL_PATH = Path(__file__).parent / 'models/dmonitoring_model_tinygrad.pkl'
 
+# Fixed small stagger to reduce overlap with driving model GPU work
+DM_STAGGER_SEC = 0.008
+
 
 class DriverStateResult(ctypes.Structure):
   _fields_ = [
@@ -165,6 +168,9 @@ def main():
     sm.update(0)
     if sm.updated["liveCalibration"]:
       calib[:] = np.array(sm["liveCalibration"].rpyCalib)
+
+    # Small fixed delay to reduce GPU overlap with driving model
+    time.sleep(DM_STAGGER_SEC)
 
     t1 = time.perf_counter()
     model_output, gpu_execution_time = model.run(buf, calib, model_transform)
