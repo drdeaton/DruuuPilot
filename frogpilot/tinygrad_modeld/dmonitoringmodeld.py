@@ -34,7 +34,7 @@ SEND_RAW_PRED = os.getenv('SEND_RAW_PRED')
 MODEL_PKL_PATH = Path(__file__).parent / 'models/dmonitoring_model_tinygrad.pkl'
 
 # Fixed small stagger to reduce overlap with driving model GPU work
-DM_STAGGER_SEC = 0.008
+DM_STAGGER_SEC = 0.010
 
 
 class DriverStateResult(ctypes.Structure):
