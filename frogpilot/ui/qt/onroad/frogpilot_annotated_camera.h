@@ -19,41 +19,41 @@ public:
   void paintRainbowPath(QPainter &p, QLinearGradient &bg, float lin_grad_point, SubMaster &sm);
   void updateState(const FrogPilotUIState &fs, const QJsonObject &frogpilot_toggles);
 
-  bool bigMapOpen;
-  bool hideBottomIcons;
-  bool isCruiseSet;
-  bool mapButtonVisible;
-  bool mutcdSpeedLimit;
-  bool rightHandDM;
-  bool viennaSpeedLimit;
+  bool bigMapOpen = false;
+  bool hideBottomIcons = false;
+  bool isCruiseSet = false;
+  bool mapButtonVisible = false;
+  bool mutcdSpeedLimit = false;
+  bool rightHandDM = false;
+  bool viennaSpeedLimit = false;
 
-  int alertHeight;
-  int signMargin;
-  int standstillDuration;
+  int alertHeight = 0;
+  int signMargin = 0;
+  int standstillDuration = 0;
 
-  float distanceConversion;
-  float setSpeed;
-  float speed;
-  float speedConversion;
-  float speedConversionMetrics;
+  float distanceConversion = 0.0f;
+  float setSpeed = 0.0f;
+  float speed = 0.0f;
+  float speedConversion = 0.0f;
+  float speedConversionMetrics = 0.0f;
 
   QColor blueColor(int alpha = 255) { return QColor(0, 0, 255, alpha); }
   QColor purpleColor(int alpha = 255) { return QColor(128, 0, 128, alpha); }
 
-  QPoint dmIconPosition;
-  QPoint experimentalButtonPosition;
+  QPoint dmIconPosition = {};
+  QPoint experimentalButtonPosition = {};
 
-  QRect leadTextRect;
-  QRect newSpeedLimitRect;
-  QRect setSpeedRect;
-  QRect speedLimitRect;
+  QRect leadTextRect = {};
+  QRect newSpeedLimitRect = {};
+  QRect setSpeedRect = {};
+  QRect speedLimitRect = {};
 
-  QSize defaultSize;
+  QSize defaultSize = {};
 
   QString accelerationUnit;
   QString leadDistanceUnit;
   QString leadSpeedUnit;
-  QString signalStyle;
+  QString signalStyle = "None";
   QString speedLimitOffsetStr;
   QString speedUnit;
 
@@ -76,12 +76,12 @@ private:
   void paintTurnSignals(QPainter &p, const cereal::CarState::Reader &carState);
   void updateSignals();
 
-  int animationFrameIndex;
-  int signalAnimationLength;
-  int signalHeight;
-  int signalMovement;
-  int signalWidth;
-  int totalFrames;
+  int animationFrameIndex = 0;
+  int signalAnimationLength = 0;
+  int signalHeight = 0;
+  int signalMovement = 0;
+  int signalWidth = 0;
+  int totalFrames = 0;
 
   Params params_memory{"/dev/shm/params"};
 
@@ -110,13 +110,13 @@ private:
   QPixmap stopSignImg;
   QPixmap turnIcon;
 
-  QPoint cemStatusPosition;
-  QPoint lateralPausedPosition;
+  QPoint cemStatusPosition = {};
+  QPoint lateralPausedPosition = {};
 
   QString mtscSpeedStr;
   QString vtscSpeedStr;
 
-  QTimer *animationTimer;
+  QTimer *animationTimer = nullptr;
 
   QVector<QPixmap> blindspotImages;
   QVector<QPixmap> signalImages;

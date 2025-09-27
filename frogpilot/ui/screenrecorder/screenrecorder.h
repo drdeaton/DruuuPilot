@@ -23,6 +23,7 @@ private slots:
 private:
   void encodeImage();
   void updateState();
+  bool prepareForRecording(QImage frame);
 
   bool recording = false;
 
@@ -35,6 +36,9 @@ private:
   std::unique_ptr<OmxEncoder> encoder;
 
   std::vector<uint8_t> rgbScaleBuffer;
+  size_t frameBufferSize = 0;
+  int recordingWidth = 0;
+  int recordingHeight = 0;
 
   static constexpr int kMaxBufferedFrames = 3;
   BlockingQueue<QImage> imageQueue{kMaxBufferedFrames};

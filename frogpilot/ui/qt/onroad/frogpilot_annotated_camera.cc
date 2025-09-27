@@ -1,4 +1,5 @@
 #include <QMovie>
+#include <algorithm>
 
 #include "frogpilot/ui/qt/onroad/frogpilot_annotated_camera.h"
 
@@ -227,13 +228,21 @@ void FrogPilotAnnotatedCameraWidget::paintFrogPilotWidgets(QPainter &p, UIState 
     paintStoppingPoint(p, scene, frogpilot_scene, frogpilot_toggles);
   }
 
-  if (!bigMapOpen && (carState.getLeftBlinker() || carState.getRightBlinker()) && signalStyle != "None") {
-    if (!animationTimer->isActive()) {
-      animationTimer->start(signalAnimationLength);
+  const bool signalActive = carState.getLeftBlinker() || carState.getRightBlinker();
+  const bool shouldShowSignals = !bigMapOpen && signalActive && signalStyle != "None";
+  const bool shouldAnimateSignals = shouldShowSignals && totalFrames > 1;
+
+  if (shouldAnimateSignals) {
+    const int interval = signalAnimationLength > 0 ? signalAnimationLength : 500;
+    if (!animationTimer->isActive() || animationTimer->interval() != interval) {
+      animationTimer->start(interval);
     }
-    paintTurnSignals(p, carState);
   } else if (animationTimer->isActive()) {
     animationTimer->stop();
+  }
+
+  if (shouldShowSignals) {
+    paintTurnSignals(p, carState);
   }
 }
 

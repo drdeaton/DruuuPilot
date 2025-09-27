@@ -235,6 +235,8 @@ class CarController(CarControllerBase):
 
     # === Off-pulse scheduling on regen release ===
     if not raw_regen_active and self.last_regen_active:
+      # Clear any pending paddle commands when regen stops
+      self.paddle_queue.clear()
       # schedule two off-slots at 1/3 and 2/3 of the last steer interval
       if self.prev_steer_ts_ns and self.last_steer_ts_ns:
         intv = self.last_steer_ts_ns - self.prev_steer_ts_ns
