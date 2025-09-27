@@ -3,8 +3,6 @@
 #include <QFile>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QDoubleSpinBox>
-#include <QPushButton>
 
 FrogPilotModelPanel::FrogPilotModelPanel(FrogPilotSettingsWindow *parent) : FrogPilotListWidget(parent), parent(parent) {
   QStackedLayout *modelLayout = new QStackedLayout();
@@ -27,13 +25,10 @@ FrogPilotModelPanel::FrogPilotModelPanel(FrogPilotSettingsWindow *parent) : Frog
     {"DeleteModel", tr("Delete Driving Models"), tr("Delete driving models from the device."), ""},
     {"DownloadModel", tr("Download Driving Models"), tr("Download driving models to the device."), ""},
     {"ModelRandomizer", tr("Model Randomizer"), tr("Driving models are chosen at random each drive and feedback prompts are used to find the model that best suits your needs."), ""},
-    {"StopDistance", tr("Stop Distance"), tr("Adjust the model's stopping distance in meters (minimum 4 for safety). Most users prefer 6."), ""},
     {"ManageBlacklistedModels", tr("Manage Model Blacklist"), tr("Add or remove models from the <b>Model Randomizer</b>'s blacklist list."), ""},
     {"ManageScores", tr("Manage Model Ratings"), tr("Reset or view the saved ratings for the driving models."), ""},
     {"SelectModel", tr("Select Driving Model"), tr("Select the active driving model."), ""},
   };
-
-  FrogPilotParamValueButtonControl *stopDistanceToggle = nullptr;
 
   for (const auto &[param, title, desc, icon] : modelToggles) {
     AbstractControl *modelToggle;
@@ -419,10 +414,6 @@ FrogPilotModelPanel::FrogPilotModelPanel(FrogPilotSettingsWindow *parent) : Frog
       });
       modelToggle = selectModelBtn;
 
-    } else if (param == "StopDistance") {
-      std::vector<QString> stopDistanceButton{"Reset"};
-      modelToggle = new FrogPilotParamValueButtonControl(param, title, desc, icon, 4.0, 10.0, QString(), std::map<float, QString>(), 0.1, false, {}, stopDistanceButton, false, false);
-      stopDistanceToggle = static_cast<FrogPilotParamValueButtonControl*>(modelToggle);
     } else {
       modelToggle = new ParamControl(param, title, desc, icon);
     }
@@ -450,16 +441,6 @@ FrogPilotModelPanel::FrogPilotModelPanel(FrogPilotSettingsWindow *parent) : Frog
       }
     }
   });
-
-  if (stopDistanceToggle) {
-    QObject::connect(stopDistanceToggle, &FrogPilotParamValueButtonControl::buttonClicked, [this, stopDistanceToggle]() {
-      if (ConfirmationDialog::confirm(tr("Are you sure you want to reset your <b>Stop Distance</b> to the default of 6 meters?"), tr("Reset"), this)) {
-        params.putFloat("StopDistance", 6.0);
-        stopDistanceToggle->refresh();
-        updateFrogPilotToggles();
-      }
-    });
-  }
 
   QObject::connect(parent, &FrogPilotSettingsWindow::closeSubPanel, [modelLayout, modelPanel] {modelLayout->setCurrentWidget(modelPanel);});
   QObject::connect(uiState(), &UIState::uiUpdate, this, &FrogPilotModelPanel::updateState);
@@ -670,8 +651,6 @@ void FrogPilotModelPanel::updateToggles() {
 
     else if (key == "SelectModel") {
       setVisible &= !params.getBool("ModelRandomizer");
-    } else if (key == "StopDistance") {
-      setVisible &= (tuningLevel == 3); // Only visible in developer tuning level
     }
 
     toggle->setVisible(setVisible);

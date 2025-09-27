@@ -1,6 +1,7 @@
 import itertools
 from parameterized import parameterized_class
 
+from openpilot.selfdrive.controls.lib.longitudinal_mpc_lib.long_mpc import STOP_DISTANCE
 from openpilot.selfdrive.test.longitudinal_maneuvers.maneuver import Maneuver
 
 
@@ -169,7 +170,7 @@ def create_maneuvers(kwargs):
       duration=20.,
       initial_speed=0.,
       lead_relevancy=True,
-      initial_distance_lead=6.0,
+      initial_distance_lead=STOP_DISTANCE,
       speed_lead_values=[0., 0., 2.],
       breakpoints=[1., 10., 15.],
       ensure_start=True,
