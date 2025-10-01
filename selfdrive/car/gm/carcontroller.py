@@ -186,6 +186,10 @@ class CarController(CarControllerBase):
             if self.CP.carFingerprint in SDGM_CAR:
               friction_brake_bus = CanBus.CAMERA
 
+          elif self.CP.carFingerprint == CAR.CHEVROLET_VOLT:
+            at_full_stop = at_full_stop and stopping
+            friction_brake_bus = CanBus.POWERTRAIN
+
           if self.CP.autoResumeSng:
             resume = actuators.longControlState != LongCtrlState.starting or CC.cruiseControl.resume
             at_full_stop = at_full_stop and not resume
